@@ -1,0 +1,30 @@
+{
+  "name": "x-template",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "bin": {
+    "xtpl": "./index.js"
+  },
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/x-template/x-template.git"
+  },
+  "keywords": [],
+  "author": "aztack@163.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/x-template/x-template/issues"
+  },
+  "homepage": "https://github.com/x-template/x-template#readme",
+  "dependencies": {
+    "colors": "^1.4.0",
+    "commander": "^7.2.0",
+    "debug": "^4.3.1",
+    "dl-repo-dir": "^1.0.4",
+    "inquirer": "^8.0.0",
+    "metalsmith": "^2.3.0",
+    "metalsmith-handlebars-contents": "^1.1.0"
+  }
+}
