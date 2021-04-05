@@ -1,5 +1,5 @@
 {
-  "name": "x-template",
+  "name": "@x-template/xtpl",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
