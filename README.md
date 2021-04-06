@@ -1,7 +1,7 @@
 # x-template
 
 ```sh-session
-$ npm i -g x-template
+$ npm i -g @x-template/xtpl
 $ xtpl init <template-repository> <dir>
 ```
 
