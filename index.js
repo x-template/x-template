@@ -8,6 +8,7 @@ const inquirer = require('inquirer');
 const Metalsmith = require('metalsmith');
 const handlebars = require('metalsmith-handlebars-contents');
 const Handlerbars = require('handlebars');
+const ejs = require('ejs');
 const render = require('consolidate').handlebars.render;
 const downloadRepoDir = require('dl-repo-dir').downloadRepoDir;
 const log = require('debug')('x-template');
@@ -26,6 +27,7 @@ program
   .option('--source-dir <srcDir>', 'source directory name for template')
   .option('--clean', 'clean source directory when complete')
   .option('--clone', 'clone from git repository')
+  .option('--engine <engine>', 'template engine, default is handlebars, available: handlebars, ejs')
   .command('init <source> [destination]')
   .description('Initialize from a template into a newly created directory')
   .action((source, destination) => {
@@ -65,7 +67,7 @@ function init(source, dest, opts) {
       process.stdout.write(`\r${(data.percent * 100).toFixed(1)}% Downloaded `)
     }, templating);
   }
-  
+
   function templating (tmpDir, newPath) {
     log(tmpDir.red, newPath.green);
     const metadata = readMetadata(tmpDir, dest) || {};
@@ -74,7 +76,7 @@ function init(source, dest, opts) {
     if (metadata.metalsmith && metadata.metalsmith.before === 'function') {
       metadata.metalsmith.before(metalsmith, metadata, metadata.helpers);
     }
-    
+
     inquirer.prompt(metadata.prompts).then(answer => {
       if (metadata.metalsmith && typeof metadata.metalsmith.after === 'function') {
         log(`Found metalsmith.after`);
@@ -110,15 +112,29 @@ function renderTemplate(metalsmith, data, dest, opts, metadata) {
   log(`Rendering template to ${dest}`)
   const match = mergeWithSkipped('**/*', metadata.skipInterpolation || []);
   log(`Match: ${match}`);
+  const engine = opts.engine === 'handlebars'
+    ? handlebars({
+      match,
+      helpers: metadata.helpers,
+    })
+    : (files, metalsmith, done) => {
+      const meta = metalsmith.metadata()
+      Object.keys(files).forEach(fileName => {
+        const template = files[fileName].contents.toString();
+        try {
+          files[fileName].contents = ejs.render(template, meta, opts);
+        } catch (e) {
+          console.error(`Error when rendering template ${fileName}: `, e);
+        }
+      })
+      done()
+    };
   return new Promise((resolve, reject) => {
     metalsmith.metadata(data)
       .source(opts.srcDir || 'template')
       .destination(dest)
       .clean(opts.clean || false)
-      .use(handlebars({
-        match,
-        helpers: metadata.helpers,
-      })).build(function(err) {
+      .use(engine).build(function(err) {
         if (err) {
           reject(err)
         } else {
